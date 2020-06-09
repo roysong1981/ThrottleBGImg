@@ -14,24 +14,26 @@ def current_time():
     return datetime.datetime.now().strftime(TIME_PATTERN)
 
 # 比较两个时间字符串是否在同一天
-def compare_date(current_time,json_time): 
-    ct = current_time.split()[0]
-    jt = json_time.split()[0]
-    return ct == jt
+def compare_date(current_time,start_time,end_time): 
+    c = datetime.datetime.strptime(current_time,TIME_PATTERN)
+    s = datetime.datetime.strptime(start_time,TIME_PATTERN)
+    e = datetime.datetime.strptime(end_time,TIME_PATTERN)
+    return s < c < e
 
 # 根据年份在节气日期文件夹date中找到对应的JSON数据，返回字典列表
 def year_json(year): 
     f = open('./date/' + str(year) + '.json')
     json_str = f.read()
     contents = json.loads(json_str)
+    contents.sort(key=lambda o: o['time'],reverse=False)
     return contents
 
 # 根据当前日期找到对应的节气
 def get_throttle(now_day):
     year_arr = year_json(current_year())
-    for t in year_arr:
-        if compare_date(now_day,t['time']):
-            return t
+    for idx in range(len(year_arr) -1): 
+        if compare_date(now_day,year_arr[idx]['time'],year_arr[idx+1]['time']):
+            return year_arr[idx]
     return None
 
 def setWallPaper(pic):

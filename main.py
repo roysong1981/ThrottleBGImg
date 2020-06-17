@@ -21,16 +21,16 @@ def compare_date(current_time,start_time,end_time):
     return s < c < e
 
 # 根据年份在节气日期文件夹date中找到对应的JSON数据，返回字典列表
-def year_json(year): 
-    f = open('./date/' + str(year) + '.json')
+def year_json(year,current_dir): 
+    f = open(current_dir + '/date/' + str(year) + '.json')
     json_str = f.read()
     contents = json.loads(json_str)
     contents.sort(key=lambda o: o['time'],reverse=False)
     return contents
 
 # 根据当前日期找到对应的节气
-def get_throttle(now_day):
-    year_arr = year_json(current_year())
+def get_throttle(now_day,current_dir):
+    year_arr = year_json(current_year(),current_dir)
     for idx in range(len(year_arr) -1): 
         if compare_date(now_day,year_arr[idx]['time'],year_arr[idx+1]['time']):
             return year_arr[idx]
@@ -45,10 +45,10 @@ def setWallPaper(pic):
     win32gui.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER,pic, win32con.SPIF_SENDWININICHANGE)
 
 def main():
-    json_item = get_throttle(current_time())
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    json_item = get_throttle(current_time(),current_dir)
     if json_item is None:
         return
-    current_dir = os.path.dirname(os.path.abspath(__file__))
     pic = current_dir + '/img/' + json_item['name'] + '.jpg'
     setWallPaper(pic)
 
